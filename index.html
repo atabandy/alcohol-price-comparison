@@ -1,0 +1,106 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Alcohol Price Comparison - Duty Free</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+    h1 { text-align: center; }
+    select, table { margin-top: 20px; width: 100%; max-width: 1000px; margin-left: auto; margin-right: auto; }
+    table { border-collapse: collapse; background: #fff; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
+    th { background-color: #444; color: white; }
+  </style>
+</head>
+<body>
+  <h1>Alcohol Price Comparison</h1>
+  <p style="text-align:center;">Compare alcohol prices from international airport duty-free shops</p>
+
+  <label for="brandSelect" style="display:block; text-align:center;">Choose a brand:</label>
+  <select id="brandSelect" onchange="filterByBrand()">
+    <option value="all">All Brands</option>
+  </select>
+
+  <table id="priceTable">
+    <thead>
+      <tr>
+        <th>Brand</th>
+        <th>Type</th>
+        <th>Airport</th>
+        <th>Country</th>
+        <th>Volume</th>
+        <th>Local Price</th>
+        <th>Price (USD)</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    const exchangeRates = {
+      'INR': 0.012,
+      'EUR': 1.08,
+      'AED': 0.27,
+      'QAR': 0.27,
+      'USD': 1.00
+    };
+
+    const sampleData = [
+      { brand: "Johnnie Walker Black Label", type: "Whiskey", airport: "Delhi (DEL)", country: "India", volume: "1L", currency: "INR", localPrice: 3800 },
+      { brand: "Jack Daniel's", type: "Whiskey", airport: "Mumbai (BOM)", country: "India", volume: "1L", currency: "INR", localPrice: 4000 },
+      { brand: "Jameson", type: "Whiskey", airport: "Dublin (DUB)", country: "Ireland", volume: "1L", currency: "EUR", localPrice: 28 },
+      { brand: "Chivas Regal", type: "Whiskey", airport: "Frankfurt (FRA)", country: "Germany", volume: "1L", currency: "EUR", localPrice: 35 },
+      { brand: "Absolut Vodka", type: "Vodka", airport: "Amsterdam (AMS)", country: "Netherlands", volume: "1L", currency: "EUR", localPrice: 25 },
+      { brand: "Grey Goose", type: "Vodka", airport: "Charles de Gaulle (CDG)", country: "France", volume: "1L", currency: "EUR", localPrice: 42 },
+      { brand: "Bacardi Superior", type: "Rum", airport: "Dubai (DXB)", country: "UAE", volume: "1L", currency: "AED", localPrice: 95 },
+      { brand: "Captain Morgan", type: "Rum", airport: "Abu Dhabi (AUH)", country: "UAE", volume: "1L", currency: "AED", localPrice: 85 },
+      { brand: "Corona", type: "Beer", airport: "Hamad (DOH)", country: "Qatar", volume: "6-pack", currency: "QAR", localPrice: 60 },
+      { brand: "Kingfisher", type: "Beer", airport: "Bangalore (BLR)", country: "India", volume: "6-pack", currency: "INR", localPrice: 550 },
+      { brand: "Sula Red Wine", type: "Wine", airport: "Delhi (DEL)", country: "India", volume: "750ml", currency: "INR", localPrice: 1300 },
+      { brand: "Jacob's Creek", type: "Wine", airport: "Frankfurt (FRA)", country: "Germany", volume: "750ml", currency: "EUR", localPrice: 18 }
+    ];
+
+    const tbody = document.querySelector("#priceTable tbody");
+    const brandSelect = document.getElementById("brandSelect");
+
+    function convertToUSD(currency, price) {
+      return (price * (exchangeRates[currency] || 1)).toFixed(2);
+    }
+
+    function populateTable(data) {
+      tbody.innerHTML = "";
+      data.forEach(row => {
+        const usd = convertToUSD(row.currency, row.localPrice);
+        const tr = document.createElement("tr");
+        tr.innerHTML = `<td>${row.brand}</td><td>${row.type}</td><td>${row.airport}</td><td>${row.country}</td><td>${row.volume}</td><td>${row.localPrice} ${row.currency}</td><td>$${usd}</td>`;
+        tbody.appendChild(tr);
+      });
+    }
+
+    function populateBrandSelect() {
+      const brands = [...new Set(sampleData.map(item => item.brand))];
+      brands.forEach(brand => {
+        const option = document.createElement("option");
+        option.value = brand;
+        option.textContent = brand;
+        brandSelect.appendChild(option);
+      });
+    }
+
+    function filterByBrand() {
+      const selectedBrand = brandSelect.value;
+      if (selectedBrand === "all") {
+        populateTable(sampleData);
+      } else {
+        populateTable(sampleData.filter(item => item.brand === selectedBrand));
+      }
+    }
+
+    // Initial render
+    populateBrandSelect();
+    populateTable(sampleData);
+  </script>
+</body>
+</html>
