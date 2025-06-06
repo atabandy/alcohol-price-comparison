@@ -2,25 +2,31 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Alcohol Price Comparison - Duty Free</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f7f7; }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f5; }
     h1 { text-align: center; }
-    select, table { margin-top: 20px; width: 100%; max-width: 1000px; margin-left: auto; margin-right: auto; }
+    select, table { margin-top: 20px; width: 90%; max-width: 1000px; display: block; margin-left: auto; margin-right: auto; }
     table { border-collapse: collapse; background: #fff; }
     th, td { border: 1px solid #ccc; padding: 8px; text-align: center; }
     th { background-color: #444; color: white; }
+    label { display: block; text-align: center; margin-top: 10px; }
   </style>
 </head>
 <body>
   <h1>Alcohol Price Comparison</h1>
   <p style="text-align:center;">Compare alcohol prices from international airport duty-free shops</p>
 
-  <label for="brandSelect" style="display:block; text-align:center;">Choose a brand:</label>
-  <select id="brandSelect" onchange="filterByBrand()">
+  <label for="brandSelect">Filter by Brand:</label>
+  <select id="brandSelect" onchange="filterData()">
     <option value="all">All Brands</option>
+  </select>
+
+  <label for="airportSelect">Filter by Airport:</label>
+  <select id="airportSelect" onchange="filterData()">
+    <option value="all">All Airports</option>
   </select>
 
   <table id="priceTable">
@@ -39,34 +45,39 @@
   </table>
 
   <script>
-    const exchangeRates = {
-      'INR': 0.012,
-      'EUR': 1.08,
-      'AED': 0.27,
-      'QAR': 0.27,
-      'USD': 1.00
-    };
+    const exchangeRates = { INR: 0.012, EUR: 1.08, AED: 0.27, QAR: 0.27, USD: 1.00 };
 
-    const sampleData = [
-      { brand: "Johnnie Walker Black Label", type: "Whiskey", airport: "Delhi (DEL)", country: "India", volume: "1L", currency: "INR", localPrice: 3800 },
-      { brand: "Jack Daniel's", type: "Whiskey", airport: "Mumbai (BOM)", country: "India", volume: "1L", currency: "INR", localPrice: 4000 },
-      { brand: "Jameson", type: "Whiskey", airport: "Dublin (DUB)", country: "Ireland", volume: "1L", currency: "EUR", localPrice: 28 },
-      { brand: "Chivas Regal", type: "Whiskey", airport: "Frankfurt (FRA)", country: "Germany", volume: "1L", currency: "EUR", localPrice: 35 },
+    const sampleData = [{"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3167}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3167}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3167}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3167}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 141}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 141}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 141}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 35}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 35}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 35}, {"brand": "Jack Daniel's", "type": "Whiskey", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 35}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3500}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3500}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3500}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3500}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 156}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 156}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 156}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 39}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 39}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 39}, {"brand": "Johnnie Walker Black Label", "type": "Whiskey", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 39}, {"brand": "Jameson", "type": "Whiskey", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2917}, {"brand": "Jameson", "type": "Whiskey", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2917}, {"brand": "Jameson", "type": "Whiskey", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2917}, {"brand": "Jameson", "type": "Whiskey", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2917}, {"brand": "Jameson", "type": "Whiskey", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 130}, {"brand": "Jameson", "type": "Whiskey", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 130}, {"brand": "Jameson", "type": "Whiskey", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 130}, {"brand": "Jameson", "type": "Whiskey", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 32}, {"brand": "Jameson", "type": "Whiskey", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 32}, {"brand": "Jameson", "type": "Whiskey", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 32}, {"brand": "Jameson", "type": "Whiskey", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 32}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3750}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3750}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3750}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 3750}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 167}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 167}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 167}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 42}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 42}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 42}, {"brand": "Chivas Regal", "type": "Whiskey", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 42}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2083}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2083}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2083}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 2083}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 93}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 93}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 93}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 23}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 23}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 23}, {"brand": "Absolut Vodka", "type": "Vodka", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 23}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1833}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1833}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1833}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1833}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 81}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 81}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 81}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 20}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 20}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 20}, {"brand": "Smirnoff", "type": "Vodka", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 20}, {"brand": "Heineken", "type": "Beer", "airport": "Mumbai (BOM)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 250}, {"brand": "Heineken", "type": "Beer", "airport": "Delhi (DEL)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 250}, {"brand": "Heineken", "type": "Beer", "airport": "Bangalore (BLR)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 250}, {"brand": "Heineken", "type": "Beer", "airport": "Chennai (MAA)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 250}, {"brand": "Heineken", "type": "Beer", "airport": "Dubai (DXB)", "country": "UAE", "volume": "330ml", "currency": "AED", "localPrice": 11}, {"brand": "Heineken", "type": "Beer", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "330ml", "currency": "AED", "localPrice": 11}, {"brand": "Heineken", "type": "Beer", "airport": "Doha (DOH)", "country": "Qatar", "volume": "330ml", "currency": "QAR", "localPrice": 11}, {"brand": "Heineken", "type": "Beer", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "330ml", "currency": "EUR", "localPrice": 3}, {"brand": "Heineken", "type": "Beer", "airport": "Berlin (BER)", "country": "Germany", "volume": "330ml", "currency": "EUR", "localPrice": 3}, {"brand": "Heineken", "type": "Beer", "airport": "Paris (CDG)", "country": "France", "volume": "330ml", "currency": "EUR", "localPrice": 3}, {"brand": "Heineken", "type": "Beer", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "330ml", "currency": "EUR", "localPrice": 3}, {"brand": "Kingfisher", "type": "Beer", "airport": "Mumbai (BOM)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 167}, {"brand": "Kingfisher", "type": "Beer", "airport": "Delhi (DEL)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 167}, {"brand": "Kingfisher", "type": "Beer", "airport": "Bangalore (BLR)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 167}, {"brand": "Kingfisher", "type": "Beer", "airport": "Chennai (MAA)", "country": "India", "volume": "330ml", "currency": "INR", "localPrice": 167}, {"brand": "Kingfisher", "type": "Beer", "airport": "Dubai (DXB)", "country": "UAE", "volume": "330ml", "currency": "AED", "localPrice": 7}, {"brand": "Kingfisher", "type": "Beer", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "330ml", "currency": "AED", "localPrice": 7}, {"brand": "Kingfisher", "type": "Beer", "airport": "Doha (DOH)", "country": "Qatar", "volume": "330ml", "currency": "QAR", "localPrice": 7}, {"brand": "Kingfisher", "type": "Beer", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "330ml", "currency": "EUR", "localPrice": 2}, {"brand": "Kingfisher", "type": "Beer", "airport": "Berlin (BER)", "country": "Germany", "volume": "330ml", "currency": "EUR", "localPrice": 2}, {"brand": "Kingfisher", "type": "Beer", "airport": "Paris (CDG)", "country": "France", "volume": "330ml", "currency": "EUR", "localPrice": 2}, {"brand": "Kingfisher", "type": "Beer", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "330ml", "currency": "EUR", "localPrice": 2}, {"brand": "Sula", "type": "Wine", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1250}, {"brand": "Sula", "type": "Wine", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1250}, {"brand": "Sula", "type": "Wine", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1250}, {"brand": "Sula", "type": "Wine", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1250}, {"brand": "Sula", "type": "Wine", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 56}, {"brand": "Sula", "type": "Wine", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 56}, {"brand": "Sula", "type": "Wine", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 56}, {"brand": "Sula", "type": "Wine", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 14}, {"brand": "Sula", "type": "Wine", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 14}, {"brand": "Sula", "type": "Wine", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 14}, {"brand": "Sula", "type": "Wine", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 14}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 67}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 67}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 67}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Jacob's Creek", "type": "Wine", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Bacardi", "type": "Rum", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1667}, {"brand": "Bacardi", "type": "Rum", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1667}, {"brand": "Bacardi", "type": "Rum", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1667}, {"brand": "Bacardi", "type": "Rum", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1667}, {"brand": "Bacardi", "type": "Rum", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 74}, {"brand": "Bacardi", "type": "Rum", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 74}, {"brand": "Bacardi", "type": "Rum", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 74}, {"brand": "Bacardi", "type": "Rum", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 19}, {"brand": "Bacardi", "type": "Rum", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 19}, {"brand": "Bacardi", "type": "Rum", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 19}, {"brand": "Bacardi", "type": "Rum", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 19}, {"brand": "Old Monk", "type": "Rum", "airport": "Mumbai (BOM)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Old Monk", "type": "Rum", "airport": "Delhi (DEL)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Old Monk", "type": "Rum", "airport": "Bangalore (BLR)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Old Monk", "type": "Rum", "airport": "Chennai (MAA)", "country": "India", "volume": "1L", "currency": "INR", "localPrice": 1500}, {"brand": "Old Monk", "type": "Rum", "airport": "Dubai (DXB)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 67}, {"brand": "Old Monk", "type": "Rum", "airport": "Abu Dhabi (AUH)", "country": "UAE", "volume": "1L", "currency": "AED", "localPrice": 67}, {"brand": "Old Monk", "type": "Rum", "airport": "Doha (DOH)", "country": "Qatar", "volume": "1L", "currency": "QAR", "localPrice": 67}, {"brand": "Old Monk", "type": "Rum", "airport": "Frankfurt (FRA)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Old Monk", "type": "Rum", "airport": "Berlin (BER)", "country": "Germany", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Old Monk", "type": "Rum", "airport": "Paris (CDG)", "country": "France", "volume": "1L", "currency": "EUR", "localPrice": 17}, {"brand": "Old Monk", "type": "Rum", "airport": "Amsterdam (AMS)", "country": "Netherlands", "volume": "1L", "currency": "EUR", "localPrice": 17}];
+//
+      { brand: "Jack Daniel's", type: "Whiskey", airport: "Mumbai (BOM)", country: "India", volume: "1L", currency: "INR", localPrice: 4500 },
+      { brand: "Jack Daniel's", type: "Whiskey", airport: "Dubai (DXB)", country: "UAE", volume: "1L", currency: "AED", localPrice: 95 },
+      { brand: "Jack Daniel's", type: "Whiskey", airport: "Frankfurt (FRA)", country: "Germany", volume: "1L", currency: "EUR", localPrice: 42 },
       { brand: "Absolut Vodka", type: "Vodka", airport: "Amsterdam (AMS)", country: "Netherlands", volume: "1L", currency: "EUR", localPrice: 25 },
-      { brand: "Grey Goose", type: "Vodka", airport: "Charles de Gaulle (CDG)", country: "France", volume: "1L", currency: "EUR", localPrice: 42 },
-      { brand: "Bacardi Superior", type: "Rum", airport: "Dubai (DXB)", country: "UAE", volume: "1L", currency: "AED", localPrice: 95 },
-      { brand: "Captain Morgan", type: "Rum", airport: "Abu Dhabi (AUH)", country: "UAE", volume: "1L", currency: "AED", localPrice: 85 },
-      { brand: "Corona", type: "Beer", airport: "Hamad (DOH)", country: "Qatar", volume: "6-pack", currency: "QAR", localPrice: 60 },
-      { brand: "Kingfisher", type: "Beer", airport: "Bangalore (BLR)", country: "India", volume: "6-pack", currency: "INR", localPrice: 550 },
-      { brand: "Sula Red Wine", type: "Wine", airport: "Delhi (DEL)", country: "India", volume: "750ml", currency: "INR", localPrice: 1300 },
-      { brand: "Jacob's Creek", type: "Wine", airport: "Frankfurt (FRA)", country: "Germany", volume: "750ml", currency: "EUR", localPrice: 18 }
+      { brand: "Absolut Vodka", type: "Vodka", airport: "Delhi (DEL)", country: "India", volume: "1L", currency: "INR", localPrice: 2400 },
+      { brand: "Absolut Vodka", type: "Vodka", airport: "Abu Dhabi (AUH)", country: "UAE", volume: "1L", currency: "AED", localPrice: 85 },
+      { brand: "Johnnie Walker Black Label", type: "Whiskey", airport: "Doha (DOH)", country: "Qatar", volume: "1L", currency: "QAR", localPrice: 130 },
+      { brand: "Johnnie Walker Black Label", type: "Whiskey", airport: "Bangalore (BLR)", country: "India", volume: "1L", currency: "INR", localPrice: 3900 },
+      { brand: "Johnnie Walker Black Label", type: "Whiskey", airport: "Paris (CDG)", country: "France", volume: "1L", currency: "EUR", localPrice: 39 },
+      { brand: "Jameson", type: "Whiskey", airport: "Chennai (MAA)", country: "India", volume: "1L", currency: "INR", localPrice: 3600 },
+      { brand: "Jameson", type: "Whiskey", airport: "Berlin (BER)", country: "Germany", volume: "1L", currency: "EUR", localPrice: 30 },
+      { brand: "Jameson", type: "Whiskey", airport: "Doha (DOH)", country: "Qatar", volume: "1L", currency: "QAR", localPrice: 122 }
     ];
 
     const tbody = document.querySelector("#priceTable tbody");
     const brandSelect = document.getElementById("brandSelect");
+    const airportSelect = document.getElementById("airportSelect");
 
     function convertToUSD(currency, price) {
       return (price * (exchangeRates[currency] || 1)).toFixed(2);
+    }
+
+    function populateDropdown(selectElement, values) {
+      values.forEach(value => {
+        const option = document.createElement("option");
+        option.value = value;
+        option.textContent = value;
+        selectElement.appendChild(option);
+      });
     }
 
     function populateTable(data) {
@@ -79,27 +90,19 @@
       });
     }
 
-    function populateBrandSelect() {
-      const brands = [...new Set(sampleData.map(item => item.brand))];
-      brands.forEach(brand => {
-        const option = document.createElement("option");
-        option.value = brand;
-        option.textContent = brand;
-        brandSelect.appendChild(option);
-      });
+    function filterData() {
+      const brand = brandSelect.value;
+      const airport = airportSelect.value;
+      const filtered = sampleData.filter(item =>
+        (brand === "all" || item.brand === brand) &&
+        (airport === "all" || item.airport === airport)
+      );
+      populateTable(filtered);
     }
 
-    function filterByBrand() {
-      const selectedBrand = brandSelect.value;
-      if (selectedBrand === "all") {
-        populateTable(sampleData);
-      } else {
-        populateTable(sampleData.filter(item => item.brand === selectedBrand));
-      }
-    }
-
-    // Initial render
-    populateBrandSelect();
+    // Initial Setup
+    populateDropdown(brandSelect, [...new Set(sampleData.map(i => i.brand))]);
+    populateDropdown(airportSelect, [...new Set(sampleData.map(i => i.airport))]);
     populateTable(sampleData);
   </script>
 </body>
